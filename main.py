@@ -1,3 +1,6 @@
+from win32 import win32gui
+import threading as threading
+from datetime import datetime
 def getHandle():
     global spotify_handle
     spotify_handle = win32gui.FindWindow(None,'Spotify Premium')
