@@ -11,6 +11,12 @@ def enum_window_titles():
     return titles
 
 titles = enum_window_titles()
+
+prev = ''
+played = []
+current_song = ''
+history_file_loc = 'history.txt'
+
 def getHandle():
     global spotify_handle
     spotify_handle = win32gui.FindWindow(None,'Spotify Premium')
