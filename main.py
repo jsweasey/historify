@@ -35,16 +35,16 @@ def printCurrent():
     current = win32gui.GetWindowText(spotify_handle)
     if current == 'Spotify Premium': current = 'Paused'
     if current != current_song and current != 'Paused':
-        if current_song != '': played.append('%s %s END' %(datetime.now(),current_song))
+        if current_song != '': played.append('%s END %s' %(datetime.now(),current_song))
         current_song = current
-        played.append('%s %s START' %(datetime.now(),current_song))
+        played.append('%s START %s' %(datetime.now(),current_song))
     elif current == 'Paused':
         if prev != 'Paused' and current_song != '':
-            played.append('%s %s PAUSED' %(datetime.now(),current_song))
+            played.append('%s PAUSED %s' %(datetime.now(),current_song))
     elif current == current_song and prev == 'Paused':
-        played.append('%s %s RESUMED' %(datetime.now(),current_song))
+        played.append('%s RESUMED %s' %(datetime.now(),current_song))
     if prev != current and current != 'Paused':
-        print('%s  %s NEW SONG'%(datetime.now(),current))
+        print('%s NEW SONG %s'%(datetime.now(),current))
     else:
         print('%s  %s'%(datetime.now(),current))
     prev = current
@@ -52,7 +52,6 @@ def printCurrent():
         for item in played:
             x.write('%s\n'%item)
         played.clear()
-    print(played)
 
 
 t_handle = threading.Timer(0.1, getHandle)
