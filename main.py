@@ -48,7 +48,7 @@ def printCurrent():
     else:
         print('%s  %s'%(datetime.now(),current))
     prev = current
-    with open(history_file_loc, 'a') as x:
+    with open(history_file_loc, 'a', encoding='utf_8') as x:
         for item in played:
             x.write('%s\n'%item)
         played.clear()
