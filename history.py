@@ -104,5 +104,4 @@ def terminalUpdate():
 
 
 term = Terminal()
-t_handle = threading.Timer(0.1, getHandle)
-t_handle.start()
+getHandle(True)
