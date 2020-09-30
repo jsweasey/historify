@@ -19,7 +19,7 @@ current_song = (0,'',False,0) #(Start datetime, song info, if paused, total time
 history_file_loc = 'history.txt'
 last_10_songs = []
 pause_at = ''
-need_update = False
+need_update = True
 
 def init():
     term = Terminal()
