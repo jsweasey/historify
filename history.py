@@ -25,14 +25,22 @@ def init():
     term = Terminal()
 
 
-def getHandle():
+def getHandle(init:bool):
     global spotify_handle
+    global need_update
+
     spotify_handle = win32gui.FindWindow(None,'Spotify Premium')
     if spotify_handle != 0:
-        t_playing = threading.Timer(0.1, printCurrent).start()
-        t_terminal = threading.Timer(0.1, terminalUpdate).start()
+        if init:
+            t_playing = threading.Timer(0.1, printCurrent).start()
+            t_terminal = threading.Timer(0.1, terminalUpdate).start()
     else:
-        t_handle = threading.Timer(0.1, getHandle).start()
+        if init:
+            t_handle = threading.Timer(0.1, (lambda: getHandle(True))).start()
+        if need_update:
+            print(term.clear)
+            print(term.move(12,0) + 'Is Spotify not open or currently playing? Make sure it is open and paused.')
+            need_update = False
 
 
 def printCurrent():
