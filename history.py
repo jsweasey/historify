@@ -53,28 +53,39 @@ def printCurrent():
 
     t_playing = threading.Timer(0.1, printCurrent).start()
     current = win32gui.GetWindowText(spotify_handle)
-    if current == 'Spotify Premium':
-        current = 'Paused'
-        current_song = (current_song[0],current_song[1],True,current_song[3])
-    if current != current_song[1] and current != 'Paused':
-        if current_song[1] != '':
+    if current == '':
+        getHandle(False)
+        if prev != '':
             length = datetime.now() - current_song[0]
-            played.append('END %s %s %s %s' %(datetime.now(),current_song[1],(length).total_seconds(),current_song[3]))
-        current_song = (datetime.now(), current, False, 0)
-        last_10_songs.append(current_song[1])
-        if len(last_10_songs) > 10:
-            last_10_songs.pop(0)
-        played.append('START %s %s' %(current_song[0],current_song[1]))
-        pause_at = ''
-    elif current == 'Paused':
-        if prev != 'Paused' and current_song[1] != '':
-            played.append('PAUSED %s %s' %(datetime.now(),current_song[1]))
-            pause_at = datetime.now()
-    elif current == current_song[1] and prev == 'Paused':
-        pause_time = current_song[3]
-        pause_time += (datetime.now() - pause_at).total_seconds()
-        played.append('RESUMED %s %s %s' %(datetime.now(),current_song[1],pause_time))
-        current_song = (current_song[0],current_song[1], False, pause_time)
+            played.append('END  %s  %s  %s  %s' %(datetime.now(),current_song[1],(length).total_seconds(),current_song[3]))
+            current_song = (0,'',False,0)
+    else:
+        if current == 'Spotify Premium':
+            current = 'Paused'
+            current_song = (current_song[0],current_song[1],True,current_song[3])
+        if current != current_song[1] and current != 'Paused':
+            if current_song[1] != '':
+                length = datetime.now() - current_song[0]
+                played.append('END  %s  %s  %s  %s' %(datetime.now(),current_song[1],(length).total_seconds(),current_song[3]))
+                current_song = (0,'',False,0)
+            if current != '':
+                current_song = (datetime.now(), current, False, 0)
+                last_10_songs.append(current_song[1])
+                if len(last_10_songs) > 10:
+                    last_10_songs.pop(0)
+                if current != '':
+                    played.append('START  %s  %s' %(current_song[0],current_song[1]))
+                pause_at = ''
+        elif current == 'Paused':
+            if prev != 'Paused' and prev != '' and current_song[1] != '':
+                current_song = (current_song[0],current_song[1],True,current_song[3])
+                played.append('PAUSED  %s  %s' %(datetime.now(),current_song[1]))
+                pause_at = datetime.now()
+        elif current == current_song[1] and prev == 'Paused':
+            pause_time = current_song[3]
+            pause_time += (datetime.now() - pause_at).total_seconds()
+            played.append('RESUMED  %s  %s  %s' %(datetime.now(),current_song[1],pause_time))
+            current_song = (current_song[0],current_song[1], False, pause_time)
     with open(history_file_loc, 'a', encoding='utf_8') as x:
         for item in played:
             x.write('%s\n'%item)
