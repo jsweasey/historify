@@ -86,7 +86,7 @@ def terminalUpdate():
         print(term.move(0,10) + 'Last 10 songs played:')
         for x in range(len(last_10_songs)):
             print(term.move(len(last_10_songs)-x,(10)) + ('%s. %s' %(len(last_10_songs)-x, last_10_songs[x])))
-        if current_song[2]:
+        if current_song[2] and current_song[1] != '':
             print(term.move_xy(0,11) + ('Currently playing: %s PAUSED' %current_song[1]))
         else:
             print(term.move_xy(0,11) + ('Currently playing: %s' %current_song[1]))
