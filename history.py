@@ -39,7 +39,7 @@ def getHandle(init:bool):
             t_handle = threading.Timer(0.1, (lambda: getHandle(True))).start()
         if need_update:
             print(term.clear)
-            print(term.move(12,0) + 'Is Spotify not open or currently playing? Make sure it is open and paused.')
+            print(term.move(13,0) + 'Is Spotify not open or currently playing? Make sure it is open and paused.')
             need_update = False
 
 
@@ -102,13 +102,13 @@ def terminalUpdate():
 
     if need_update:
         print(term.clear)
-        print(term.move(0,10) + 'Last 10 songs played:')
+        print(term.move(0,0) + 'Last 10 songs played:')
         for x in range(len(last_10_songs)):
-            print(term.move(len(last_10_songs)-x,(10)) + ('%s. %s' %(len(last_10_songs)-x, last_10_songs[x])))
+            print(term.move(len(last_10_songs)-x,(1)) + ('%s. %s' %(len(last_10_songs)-x, last_10_songs[x])))
         if current_song[2] and current_song[1] != '':
-            print(term.move_xy(0,11) + ('Currently playing: %s PAUSED' %current_song[1]))
+            print(term.move_xy(0,12) + ('Currently playing: %s PAUSED' %current_song[1]))
         else:
-            print(term.move_xy(0,11) + ('Currently playing: %s' %current_song[1]))
+            print(term.move_xy(0,12) + ('Currently playing: %s' %current_song[1]))
 
         need_update = False
 
