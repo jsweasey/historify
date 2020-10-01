@@ -1,5 +1,8 @@
 
 
+#TO ADD:
+#setting to removes entries under a certain length (e.g <5 secs)
+
 with open('history.txt', 'r', encoding='utf_8') as x:
     data = x.read().splitlines()
 
@@ -23,5 +26,14 @@ for i,entry in enumerate(clean_data):
                 song_data_dict[clean_data[i-1][2]]['repeats'] -= 1
 
         song_data_dict[entry[2]]['repeats'] += 1
+    if entry[0] == 'END':
+        time_listened = (float(entry[3]) - float(entry[4]))
+        time_paused = (float(entry[4]))
+        song_data_dict[entry[2]]['total_listened'] += time_listened
+        song_data_dict[entry[2]]['total_paused'] += time_paused
+        total_time_listened += time_listened
+        total_time_paused += time_paused
+
+print(song_data_dict)
 print(total_time_listened)
 print(total_time_paused)
