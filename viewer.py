@@ -7,14 +7,13 @@ clean_data = []
 for line in data:
     clean_data.append(line.split("  "))
 
-print(clean_data)
-
 total_time_listened, total_time_paused = 0, 0
 song_data_dict = {}
 
-for entry in clean_data:
+for i,entry in enumerate(clean_data):
     if entry[2] not in list(song_data_dict.keys()):
-        song_data_dict.update({entry[2]:[]})
+        name = entry[2].split(' - ')
+        song_data_dict.update({entry[2]:{'song':name[1],'artist':name[0],'length':0,'total_listened':0.0,'total_paused':0.0,'repeats':0}})
     if entry[0] == 'START':
 
         if (i > 0) and clean_data[i-1][0] != 'END': #Removes entries which have no defined END
