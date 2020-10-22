@@ -478,7 +478,7 @@ def terminalSongs():
         else: disp_layout = layout
 
         total_pages = math.ceil(len(disp_layout)/columns)
-        print(term.move_xy(2,7) + term.bold('Total Songs: %s, Columns: %s,%s') %(len(song_data_dict.keys()),columns,column_height) + term.black_on_white('PRESS "s" TO SORT'))
+        print(term.move_xy(2,7) + term.bold('Total Songs: %s, Columns: %s,%s ') %(len(song_data_dict.keys()),columns,column_height) + term.black_on_white('PRESS "s" TO SORT'))
 
         refreshLayout()
 
@@ -503,7 +503,7 @@ def terminalSongs():
                     sel_x = columns-1
                     refreshLayout()
             elif input.name == 'KEY_RIGHT':
-                if sel_x < columns-1 and (current_page*columns)+sel_x+1 < len(disp_layout): #and sel_y < len(disp_layout[sel_x+1]) 
+                if sel_x < columns-1 and (current_page*columns)+sel_x+1 < len(disp_layout): #and sel_y < len(disp_layout[sel_x+1])
                     sel_x += 1
                     updateLayout('RIGHT')
                 elif sel_x == columns-1 and current_page < total_pages:
