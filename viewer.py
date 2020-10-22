@@ -144,7 +144,7 @@ def terminalSongs():
             for x in range(columns):
                 x_show.append((current_page*columns)+x)
 
-            print(term.move_xy(2,8) + term.black_on_white('Page %s of %s') %(current_page+1,total_pages))
+            print(term.move_xy(2,term.height-2) + term.black_on_white('Page %s of %s') %(current_page+1,total_pages))
 
             for x_index,c in enumerate(x_show):
                 if c < len(disp_layout):
@@ -343,7 +343,7 @@ def terminalSongs():
             for x in range(columns):
                 x_show.append((current_page*columns)+x)
 
-            print(term.move_xy(2,8) + term.black_on_white('Page %s of %s') %(current_page+1,total_pages))
+            print(term.move_xy(2,term.height-2) + term.black_on_white('Page %s of %s') %(current_page+1,total_pages))
 
             for x_index,c in enumerate(x_show):
                 if c < len(disp_layout):
