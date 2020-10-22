@@ -298,7 +298,7 @@ def terminalSongs():
                     sel_y -= 1
                     updateLayout('UP')
             elif input.name == 'KEY_DOWN':
-                if sel_y < len(disp_layout[sel_x])-1:
+                if sel_y < len(disp_layout[(current_page*columns)+sel_x])-1:
                     sel_y += 1
                     updateLayout('DOWN')
             elif input.name == 'KEY_LEFT':
@@ -313,9 +313,11 @@ def terminalSongs():
                 if sel_x < columns-1 and (current_page*columns)+sel_x+1 < len(disp_layout): #and sel_y < len(disp_layout[sel_x+1])
                     sel_x += 1
                     updateLayout('RIGHT')
-                elif sel_x == columns-1 and current_page < total_pages:
+                elif sel_x == columns-1 and current_page+1 < total_pages:
                     current_page += 1
                     sel_x = 0
+                    if len((disp_layout[(current_page*columns)+sel_x]))-1 < sel_y:
+                        sel_y = len((disp_layout[(current_page*columns)+sel_x]))-1
                     refreshLayout()
             elif input == 's' or input == 'S':
                 disp_sorted = checkSort()
@@ -491,7 +493,7 @@ def terminalSongs():
                     sel_y -= 1
                     updateLayout('UP')
             elif input.name == 'KEY_DOWN':
-                if sel_y < len(disp_layout[sel_x])-1:
+                if sel_y < len(disp_layout[(current_page*columns)+sel_x])-1:
                     sel_y += 1
                     updateLayout('DOWN')
             elif input.name == 'KEY_LEFT':
@@ -506,9 +508,11 @@ def terminalSongs():
                 if sel_x < columns-1 and (current_page*columns)+sel_x+1 < len(disp_layout): #and sel_y < len(disp_layout[sel_x+1])
                     sel_x += 1
                     updateLayout('RIGHT')
-                elif sel_x == columns-1 and current_page < total_pages:
+                elif sel_x == columns-1 and current_page+1 < total_pages:
                     current_page += 1
                     sel_x = 0
+                    if len((disp_layout[(current_page*columns)+sel_x]))-1 < sel_y:
+                        sel_y = len((disp_layout[(current_page*columns)+sel_x]))-1
                     refreshLayout()
             elif input == 's' or input == 'S':
                 disp_sorted = checkSort()
