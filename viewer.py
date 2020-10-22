@@ -559,7 +559,7 @@ def terminalOptions():
 def terminalMenu():
     global term
     title = 'Spotify History/Stats'
-    menu_list = ['Stats','Songs','Options','Quit']
+    menu_list = ['Stats','Songs','Search','Options','Quit']
     menu_dict = {0:terminalStats,1:terminalSongs,2:terminalOptions}
     menu_x = 2
     sel = 0
