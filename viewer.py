@@ -2,11 +2,11 @@ from blessed import Terminal
 import threading as threading
 import datetime as datetime
 import time as time
+import math as math
 
 #TO ADD:
 #setting to removes entries under a certain length (e.g <5 secs)
 total_time_listened, total_time_paused = 0, 0
-song_data_dict = {}
 term = Terminal()
 
 def initData(fileloc:str):
@@ -18,6 +18,8 @@ def initData(fileloc:str):
     clean_data = []
     for line in data:
         clean_data.append(line.split("  "))
+
+    song_data_dict = {}
 
     for i,entry in enumerate(clean_data):
         if entry[2] not in list(song_data_dict.keys()):
@@ -49,7 +51,7 @@ def initData(fileloc:str):
             total_time_paused += time_paused
 
 
-        artist_data_dict = {}
+    artist_data_dict = {}
 
     for song in list(song_data_dict.keys()):
         artist = song_data_dict[song]['artist']
@@ -137,14 +139,22 @@ def terminalSongs():
             print(term.move_xy(0,9) + term.clear_eos)
             if disp_sorted: disp_layout = sorted_layout
             else: disp_layout = layout
-            for x_index,c in enumerate(disp_layout):
-                for y_index,item in enumerate(c):
-                    if len(item['artist']) > 34:
-                        to_print = item['artist'][:33] + '...'
-                    else:
-                        to_print = item['artist']
-                    if x_index == sel_x and y_index == sel_y: print(term.move_xy(2+(column_width*x_index),9+y_index) + term.black_on_white(to_print))
-                    else: print(term.move_xy(2+(column_width*x_index),9+y_index) + to_print)
+            x_show = []
+
+            for x in range(columns):
+                x_show.append((current_page*columns)+x)
+
+            print(term.move_xy(2,8) + term.black_on_white('Page %s of %s') %(current_page+1,total_pages))
+
+            for x_index,c in enumerate(x_show):
+                if c < len(disp_layout):
+                    for y_index,item in enumerate(disp_layout[c]):
+                        if len(item['artist']) > 34:
+                            to_print = item['artist'][:33] + '...'
+                        else:
+                            to_print = item['artist']
+                        if x_index == sel_x and y_index == sel_y: print(term.move_xy(2+(column_width*x_index),9+y_index) + term.black_on_white(to_print))
+                        else: print(term.move_xy(2+(column_width*x_index),9+y_index) + to_print)
 
         def updateLayout(dir:str):
 
@@ -152,8 +162,8 @@ def terminalSongs():
             elif dir == 'DOWN': n_sel_y,n_sel_x = sel_y-1,sel_x
             elif dir == 'LEFT': n_sel_y,n_sel_x = sel_y,sel_x+1
             elif dir == 'RIGHT': n_sel_y,n_sel_x = sel_y,sel_x-1
-            to_print_w = disp_layout[n_sel_x][n_sel_y]['artist']
-            to_print_b = disp_layout[sel_x][sel_y]['artist']
+            to_print_w = disp_layout[(current_page*columns)+n_sel_x][n_sel_y]['artist']
+            to_print_b = disp_layout[(current_page*columns)+sel_x][sel_y]['artist']
             if len(disp_layout[n_sel_x][n_sel_y]['artist']) > (column_width-4): to_print_w = to_print_w[:33] + '...'
             if len(disp_layout[sel_x][sel_y]['artist']) > (column_width-4): to_print_b = to_print_b[:33] + '...'
             print(term.move_xy(2+(column_width*n_sel_x),9+(n_sel_y)) + term.white_on_black(to_print_w))
@@ -260,8 +270,7 @@ def terminalSongs():
         disp_sorted = False
         temp_arr = []
         sel_x,sel_y = 0,0
-
-        print(term.move_xy(2,7) + term.bold('Total Artists: %s, Columns: %s,%s') %(len(artist_data_dict.keys()),columns,column_height) + term.black_on_white('PRESS "s" TO SORT') )
+        current_page = 0
 
         x = 0
         for index,item in enumerate(list(artist_data_dict.keys())):
@@ -276,6 +285,8 @@ def terminalSongs():
         if disp_sorted: disp_layout = sorted_layout
         else: disp_layout = layout
 
+        total_pages = math.ceil(len(disp_layout)/columns)
+        print(term.move_xy(2,7)+ term.bold('Total Artists: %s, Columns: %s,%s ') %(len(artist_data_dict.keys()),columns,column_height) + term.black_on_white('PRESS "s" TO SORT') )
         refreshLayout()
 
         while True:
@@ -294,16 +305,24 @@ def terminalSongs():
                 if sel_x > 0:
                     sel_x -= 1
                     updateLayout('LEFT')
+                elif sel_x == 0 and current_page > 0:
+                    current_page -= 1
+                    sel_x = columns-1
+                    refreshLayout()
             elif input.name == 'KEY_RIGHT':
-                if sel_x < len(disp_layout)-1 and sel_y < len(disp_layout[sel_x+1]):
+                if sel_x < columns-1 and (current_page*columns)+sel_x+1 < len(disp_layout): #and sel_y < len(disp_layout[sel_x+1])
                     sel_x += 1
                     updateLayout('RIGHT')
+                elif sel_x == columns-1 and current_page < total_pages:
+                    current_page += 1
+                    sel_x = 0
+                    refreshLayout()
             elif input == 's' or input == 'S':
                 disp_sorted = checkSort()
                 print(term.move_xy(0,9) + term.clear_eos)
                 refreshLayout()
             elif input.name == 'KEY_ENTER':
-                terminalArtists_Info(disp_layout[sel_x][sel_y]['artist'])
+                terminalArtists_Info(disp_layout[(sel_x+(current_page*columns))][sel_y]['artist'])
                 print(term.move_xy(0,9) + term.clear_eos)
                 refreshLayout()
             elif input.name == 'KEY_BACKSPACE':
@@ -316,14 +335,23 @@ def terminalSongs():
             print(term.move_xy(0,9) + term.clear_eos)
             if disp_sorted: disp_layout = sorted_layout
             else: disp_layout = layout
-            for x_index,c in enumerate(disp_layout):
-                for y_index,item in enumerate(c):
-                    if len(item['song']) > 34:
-                        to_print = item['song'][:33] + '...'
-                    else:
-                        to_print = item['song']
-                    if x_index == sel_x and y_index == sel_y: print(term.move_xy(2+(column_width*x_index),9+y_index) + term.black_on_white(to_print))
-                    else: print(term.move_xy(2+(column_width*x_index),9+y_index) + to_print)
+
+            x_show = []
+
+            for x in range(columns):
+                x_show.append((current_page*columns)+x)
+
+            print(term.move_xy(2,8) + term.black_on_white('Page %s of %s') %(current_page+1,total_pages))
+
+            for x_index,c in enumerate(x_show):
+                if c < len(disp_layout):
+                    for y_index,item in enumerate(disp_layout[c]):
+                        if len(item['song']) > 34:
+                            to_print = item['song'][:33] + '...'
+                        else:
+                            to_print = item['song']
+                        if x_index == sel_x and y_index == sel_y: print(term.move_xy(2+(column_width*x_index),9+y_index) + term.black_on_white(to_print))
+                        else: print(term.move_xy(2+(column_width*x_index),9+y_index) + to_print)
 
         def updateLayout(dir:str):
             if disp_sorted: disp_layout = sorted_layout
@@ -333,8 +361,8 @@ def terminalSongs():
             elif dir == 'DOWN': n_sel_y,n_sel_x = sel_y-1,sel_x
             elif dir == 'LEFT': n_sel_y,n_sel_x = sel_y,sel_x+1
             elif dir == 'RIGHT': n_sel_y,n_sel_x = sel_y,sel_x-1
-            to_print_w = disp_layout[n_sel_x][n_sel_y]['song']
-            to_print_b = disp_layout[sel_x][sel_y]['song']
+            to_print_w = disp_layout[(current_page*columns)+n_sel_x][n_sel_y]['song']
+            to_print_b = disp_layout[(current_page*columns)+sel_x][sel_y]['song']
             if len(disp_layout[n_sel_x][n_sel_y]['song']) > (column_width-4): to_print_w = to_print_w[:33] + '...'
             if len(disp_layout[sel_x][sel_y]['song']) > (column_width-4): to_print_b = to_print_b[:33] + '...'
             print(term.move_xy(2+(column_width*n_sel_x),9+(n_sel_y)) + term.white_on_black(to_print_w))
@@ -431,8 +459,7 @@ def terminalSongs():
         temp_arr = []
         disp_sorted = False
         sel_x,sel_y = 0,0
-
-        print(term.move_xy(2,7) + term.bold('Total Songs: %s, Columns: %s,%s') %(len(song_data_dict.keys()),columns,column_height))
+        current_page = 0
 
         x = 0
         for index,item in enumerate(list(song_data_dict.keys())):
@@ -449,6 +476,9 @@ def terminalSongs():
 
         if disp_sorted: disp_layout = sorted_layout
         else: disp_layout = layout
+
+        total_pages = math.ceil(len(disp_layout)/columns)
+        print(term.move_xy(2,7) + term.bold('Total Songs: %s, Columns: %s,%s') %(len(song_data_dict.keys()),columns,column_height) + term.black_on_white('PRESS "s" TO SORT'))
 
         refreshLayout()
 
@@ -468,16 +498,24 @@ def terminalSongs():
                 if sel_x > 0:
                     sel_x -= 1
                     updateLayout('LEFT')
+                elif sel_x == 0 and current_page > 0:
+                    current_page -= 1
+                    sel_x = columns-1
+                    refreshLayout()
             elif input.name == 'KEY_RIGHT':
-                if sel_x < len(disp_layout)-1 and sel_y < len(disp_layout[sel_x+1]):
+                if sel_x < columns-1 and (current_page*columns)+sel_x+1 < len(disp_layout): #and sel_y < len(disp_layout[sel_x+1]) 
                     sel_x += 1
                     updateLayout('RIGHT')
+                elif sel_x == columns-1 and current_page < total_pages:
+                    current_page += 1
+                    sel_x = 0
+                    refreshLayout()
             elif input == 's' or input == 'S':
                 disp_sorted = checkSort()
                 print(term.move_xy(0,9) + term.clear_eos)
                 refreshLayout()
             elif input.name == 'KEY_ENTER':
-                terminalSongs_Info(disp_layout[sel_x][sel_y]['key'])
+                terminalSongs_Info(disp_layout[(sel_x+(current_page*columns))][sel_y]['key'])
                 print(term.move_xy(0,9) + term.clear_eos)
                 refreshLayout()
             elif input.name == 'KEY_BACKSPACE':
