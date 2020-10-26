@@ -3,6 +3,7 @@ import threading as threading
 import datetime as datetime
 import time as time
 import math as math
+import psutil as psutil
 
 #TO ADD:
 #setting to removes entries under a certain length (e.g <5 secs)
@@ -646,6 +647,15 @@ def terminalMenu():
 def terminalInfo():
     pass
 
+def terminalHistoryCheck():
+    global term
+
+    while True:
+        if 'python.exe' in (proc.info['name'] for proc in psutil.process_iter(['name'])):
+            print(term.move_xy(0,0) + term.darkgreen('HISTORY RUNNING'))
+        else:
+            print(term.move_xy(0,0) + term.darkgreen('HISTORY NOT RUNNING'))
+        time.sleep(0.5)
 
 def terminalMain():
     global term
@@ -657,8 +667,9 @@ def terminalMain():
             break
 
 def terminalRun():
-
-    t_terminal = threading.Thread(target=terminalMain(),name='t_terminal')
+    t_check = threading.Thread(target=terminalHistoryCheck,name='t_check')
+    t_terminal = threading.Thread(target=terminalMain,name='t_terminal')
+    t_check.start()
     t_terminal.start()
 
 initData('history.txt')
