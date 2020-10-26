@@ -107,31 +107,81 @@ def terminalSongs():
             if input.name == 'KEY_BACKSPACE': break
 
     def terminalArtists_Info(artist:str):
+
+        def update_Artist_Info():
+            i_c = 0
+            print(term.move_xy(0,9) + term.clear_eos)
+            print(term.move_xy(0,10) + term.center(term.black_on_darkgreen(artist)))
+            for index,item in enumerate(list(stats.keys())):
+                if item == 'Songs':
+                    print(term.move_xy(2,11+index+i_c) + item + ': ')
+                    if len(stats[item]) < 8:
+                        for i in range(len(stats[item])):
+                            if stats[item][i][2]:
+                                if i == song_sel:
+                                    print(term.move_xy(20,11+index+i) + term.black_on_white('%s - %s, %s seconds listened') %(stats[item][i][1],stats[item][i][3],int(song_data_dict[stats[item][i][0]]['total_listened'])//1))
+                                else:
+                                    print(term.move_xy(20,11+index+i) + term.white_on_black('%s - %s, %s seconds listened') %(stats[item][i][1],stats[item][i][3],int(song_data_dict[stats[item][i][0]]['total_listened'])//1))
+                            else:
+                                if i == song_sel:
+                                    print(term.move_xy(20,11+index+i) + term.black_on_white('%s, %s seconds listened') %(stats[item][i][1],int(song_data_dict[stats[item][i][0]]['total_listened'])//1))
+                                else:
+                                    print(term.move_xy(20,11+index+i) + term.white_on_black('%s, %s seconds listened') %(stats[item][i][1],int(song_data_dict[stats[item][i][0]]['total_listened'])//1))
+                            i_c = i
+                    else:
+                        songs_to_disp = []
+                        for i_song in range(song_sel-6,song_sel):
+                            if i_song > -1:
+                                songs_to_disp.append(stats[item][i_song])
+                        songs_to_disp.append(stats[item][song_sel])
+                        for i_song in range(song_sel+1,song_sel+(8-len(songs_to_disp))):
+                            if i_song < len(stats[item])-1:
+                                songs_to_disp.append(stats[item][i_song])
+                        for i in range(len(songs_to_disp)):
+                            if songs_to_disp[i][2]:
+                                if i == song_sel:
+                                    print(term.move_xy(20,11+index+i) + term.black_on_white('%s - %s, %s seconds listened') %(songs_to_disp[i][1],songs_to_disp[i][3],int(song_data_dict[songs_to_disp[i][0]]['total_listened'])//1))
+                                elif i == len(songs_to_disp)-1 and song_sel > i:
+                                    print(term.move_xy(20,11+index+i) + term.black_on_white('%s, %s seconds listened') %(songs_to_disp[i][1],int(song_data_dict[songs_to_disp[i][0]]['total_listened'])//1))
+                                else:
+                                    print(term.move_xy(20,11+index+i) + term.white_on_black('%s - %s, %s seconds listened') %(songs_to_disp[i][1],songs_to_disp[i][3],int(song_data_dict[songs_to_disp[i][0]]['total_listened'])//1))
+                            else:
+                                if i == song_sel:
+                                    print(term.move_xy(20,11+index+i) + term.black_on_white('%s, %s seconds listened') %(songs_to_disp[i][1],int(song_data_dict[songs_to_disp[i][0]]['total_listened'])//1))
+                                elif i == len(songs_to_disp)-1 and song_sel > i:
+                                    print(term.move_xy(20,11+index+i) + term.black_on_white('%s, %s seconds listened') %(songs_to_disp[i][1],int(song_data_dict[songs_to_disp[i][0]]['total_listened'])//1))
+                                else:
+                                    print(term.move_xy(20,11+index+i) + term.white_on_black('%s, %s seconds listened') %(songs_to_disp[i][1],int(song_data_dict[songs_to_disp[i][0]]['total_listened'])//1))
+                            i_c = i
+
+                else:
+                    print(term.move_xy(2,11+index+i_c) + item + ': ')
+                    if item == 'Listened for' or item == 'Time paused for':
+                        print(term.move_xy(20,11+index+i_c) + '%s seconds' %stats[item])
+                    else:
+                        print(term.move_xy(20,11+index+i_c) + str(stats[item]))
+        song_sel = 0
         artist_info = artist_data_dict[artist]
         stats = {'Artist':artist_info['name'],'Songs':artist_info['songs'],'Listened for':int(artist_info['total_listened']),
                  'Times played':artist_info['repeats'],'Time paused for':int(artist_info['total_paused']),'Last song played':artist_info['recent_play'][1],
                  'Last time played':artist_info['recent_play'][0]}
-        print(term.move_xy(0,9) + term.clear_eos)
-        print(term.move_xy(0,10) + term.center(term.black_on_darkgreen(artist)))
-        i_c = 0
-        for index,item in enumerate(list(stats.keys())):
-            if item == 'Songs':
-                print(term.move_xy(2,11+index+i_c) + item + ': ')
-                for i in range(len(stats[item])):
-                    if stats[item][i][2]:
-                        print(term.move_xy(20,11+index+i) + '%s - %s, %s seconds listened' %(stats[item][i][1],stats[item][i][3],int(song_data_dict[stats[item][i][0]]['total_listened'])//1))
-                    else:
-                        print(term.move_xy(20,11+index+i) + '%s, %s seconds listened' %(stats[item][i][1],int(song_data_dict[stats[item][i][0]]['total_listened'])//1))
-                    i_c = i
-            else:
-                print(term.move_xy(2,11+index+i_c) + item + ': ')
-                if item == 'Listened for' or item == 'Time paused for':
-                    print(term.move_xy(20,11+index+i_c) + '%s seconds' %stats[item])
-                else:
-                    print(term.move_xy(20,11+index+i_c) + str(stats[item]))
+
+        update_Artist_Info()
         while True:
             input = term.inkey()
-            if input.name == 'KEY_BACKSPACE': break
+            if input.name == 'KEY_BACKSPACE':
+                break
+            elif input.name == 'KEY_UP':
+                if song_sel > 0:
+                    song_sel -= 1
+                    update_Artist_Info()
+            elif input.name == 'KEY_DOWN':
+                if song_sel < len(stats['Songs'])-1:
+                    song_sel += 1
+                    update_Artist_Info()
+            elif input.name == 'KEY_ENTER':
+                terminalSongs_Info(stats['Songs'][song_sel][0])
+                update_Artist_Info()
 
     def terminalSongs_Artist():
 
