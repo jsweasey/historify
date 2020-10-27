@@ -11,7 +11,7 @@ total_time_listened, total_time_paused = 0, 0
 term = Terminal()
 
 def initData(fileloc:str):
-    global total_time_paused, total_time_listened, song_data_dict, artist_data_dict
+    global total_time_paused, total_time_listened, song_data_dict, artist_data_dict, daily_stats_data_dict
 
     with open(fileloc, 'r', encoding='utf_8') as x:
         data = x.read().splitlines()
@@ -78,9 +78,71 @@ def initData(fileloc:str):
                                                                    'total_paused':song_data_dict[song]['total_paused'],'repeats':song_data_dict[song]['repeats'],
                                                                    'recent_play':(song_data_dict[song]['recent_play'],song_data_dict[song]['song'])}})
 
+    #Daily stats, weekly stats, montly stats, yearly, specific days, daily timeline
+    daily_stats_data_dict = {} #Entry will be a day's stats
+
+    working_date = datetime.datetime.strptime(clean_data[0][1], '%Y-%m-%d %H:%M:%S.%f').date()
+
+    temp_song_dict,temp_artist_dict = {},{}
+    daily_t_t_l, daily_t_s_l, daily_t_a_l, daily_n_s_l = 0,0,0,0
+    daily_m_l_s,daily_m_l_a = '',''
+    daily_n_s_l_list = []
+
+    for entry in clean_data:
+
+        if datetime.datetime.strptime(clean_data[0][1], '%Y-%m-%d %H:%M:%S.%f').date() > working_date:
+            daily_stats_data_dict.update({working_date:{'total_time_listened':daily_t_t_l,'total_songs_listened':daily_t_s_l,'total_artists_listened':daily_t_a_l,'most_listened_song':daily_m_l_s,
+                                                  'most_listened_artist':daily_m_l_a,'total_new_songs_listened':daily_n_s_l,'new_songs_listened':daily_n_s_l_list,}})
+            temp_song_dict,temp_artist_dict = {},{}
+            daily_t_t_l, daily_t_s_l, daily_t_a_l, daily_n_s_l = 0,0,0,0
+            daily_m_l_s,daily_m_l_a = '',''
+            daily_n_s_l_list = []
+            working_date = datetime.datetime.strptime(clean_data[0][1], '%Y-%m-%d %H:%M:%S.%f').date()
+
+        if entry[0] == 'START':
+            daily_t_s_l += 1
+            if entry[2] not in list(temp_song_dict.keys()):
+                daily_n_s_l += 1
+                temp_song_dict.update({entry[2]:{'total_time_listened':0,'total_listens':1,'artist':entry[2].split(' - ')[0],}})
+                daily_n_s_l_list.append(entry[2])
+            else:
+                temp_song_dict[entry[2]]['total_listens'] += 1
+            if entry[2].split(' - ')[0] not in list(temp_artist_dict.keys()):
+                daily_t_a_l += 1
+                temp_artist_dict.update({entry[2].split(' - ')[0]:{'total_listens':1,'songs_listened':[entry[2]],'total_time_listened':0,}})
+            else:
+                temp_artist_dict[entry[2].split(' - ')[0]]['total_listens'] += 1
+                if entry[2] not in temp_artist_dict[entry[2].split(' - ')[0]]['songs_listened']:
+                    temp_artist_dict[entry[2].split(' - ')[0]]['songs_listened'].append(entry[2])
+
+        elif entry[0] == 'PAUSE':
+            pass
+        elif entry [0] == 'RESUMED':
+            pass
+        elif entry[0] == 'END':
+            daily_t_t_l += float(entry[3])
+            temp_song_dict[entry[2]]['total_time_listened'] += float(entry[3])
+            if daily_m_l_s == '' or temp_song_dict[entry[2]]['total_time_listened'] > temp_song_dict[daily_m_l_s]['total_time_listened']:
+                daily_m_l_s = entry[2]
+            temp_artist_dict[entry[2].split(' - ')[0]]['total_time_listened'] += float(entry[3])
+            if daily_m_l_a == '' or temp_artist_dict[entry[2].split(' - ')[0]]['total_time_listened'] > temp_artist_dict[daily_m_l_a]['total_time_listened']:
+                daily_m_l_a = entry[2].split(' - ')[0]
+
+    if daily_t_s_l > 0 or daily_t_t_l > 0:
+        daily_stats_data_dict.update({working_date:{'total_time_listened':daily_t_t_l,'total_songs_listened':daily_t_s_l,'total_artists_listened':daily_t_a_l,'most_listened_song':daily_m_l_s,
+                                              'most_listened_artist':daily_m_l_a,'total_new_songs_listened':daily_n_s_l,'new_songs_listened':daily_n_s_l_list,}})
+        temp_song_dict,temp_artist_dict = {},{}
+        daily_t_t_l, daily_t_s_l, daily_t_a_l, daily_n_s_l = 0,0,0,0
+        daily_m_l_s,daily_m_l_a = '',''
+        daily_n_s_l_list = []
+
+
+
 
 def terminalStats():
-    pass
+
+    print(daily_stats_data_dict)
+
 
 def terminalSongs():
 
