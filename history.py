@@ -15,6 +15,7 @@ titles = enum_window_titles()
 
 prev = ''
 played = []
+length_at_pause = 0
 current_song = (0,'',False,0) #(Start datetime, song info, if paused, total time paused(secs))
 history_file_loc = 'history.txt'
 last_10_songs = []
@@ -50,6 +51,7 @@ def printCurrent():
     global last_10_songs
     global need_update
     global pause_at
+    global length_at_pause
 
     t_playing = threading.Timer(0.1, printCurrent).start()
     current = win32gui.GetWindowText(spotify_handle)
@@ -65,8 +67,11 @@ def printCurrent():
             current_song = (current_song[0],current_song[1],True,current_song[3])
         if current != current_song[1] and current != 'Paused':
             if current_song[1] != '':
-                length = datetime.now() - current_song[0]
-                played.append('END  %s  %s  %s  %s' %(datetime.now(),current_song[1],(length).total_seconds(),current_song[3]))
+                length = (datetime.now() - current_song[0]).total_seconds()
+                if prev == 'Paused':
+                    length = length_at_pause
+                    current_song = current_song = (current_song[0],current_song[1],current_song[2],(datetime.now() - pause_at).total_seconds())
+                played.append('END  %s  %s  %s  %s' %(datetime.now(),current_song[1],length,current_song[3]))
                 current_song = (0,'',False,0)
             if current != '':
                 current_song = (datetime.now(), current, False, 0)
@@ -79,7 +84,8 @@ def printCurrent():
         elif current == 'Paused':
             if prev != 'Paused' and prev != '' and current_song[1] != '':
                 current_song = (current_song[0],current_song[1],True,current_song[3])
-                played.append('PAUSED  %s  %s' %(datetime.now(),current_song[1]))
+                played.append('PAUSED  %s  %s  %s' %(datetime.now(),current_song[1],(datetime.now() - current_song[0]).total_seconds()))
+                length_at_pause = (datetime.now() - current_song[0]).total_seconds()
                 pause_at = datetime.now()
         elif current == current_song[1] and prev == 'Paused':
             pause_time = current_song[3]
